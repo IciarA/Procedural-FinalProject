@@ -1,21 +1,10 @@
 import {vec3, vec4} from 'gl-matrix';
 import {vec2} from 'gl-matrix';
-import { throws } from 'assert';
 
-function getAngle(vec: vec2): number {
-    return Math.atan2(vec[0], vec[1]);
-}
 
-function setLength(vec: vec3, length: number): vec3 {
-    let angle = getAngle(vec2.fromValues(vec[0], vec[1]));
-    let x = Math.cos(angle) * length;
-    let y = Math.sin(angle) * length;
-    let z = Math.sin(angle) * length;
-    return vec3.fromValues(x, y, z);
-}
-
-function clamp(val: number, min: number, max: number): number {
-    return Math.min(Math.max(val, min), max);
+function sdSphere(p: vec3, s: number) : number
+{
+  return vec3.length(p) - s;
 }
 
 
@@ -36,6 +25,9 @@ class Particle {
 
     speed: number;
 
+    shape: number;
+    radius: number;
+
     constructor(x: number, y: number, z: number, col: vec4, w: number, h: number, d: number) {
         this.width = w;
         this.height = h;
@@ -51,6 +43,8 @@ class Particle {
         this.tone = 0;
 
         this.speed = 0.1;
+        this.shape = 0;
+        this.radius = 15.0;
     }
 
     movePos(v: vec3) {
@@ -83,49 +77,62 @@ class Particle {
         
         vec3.add(this.pos, this.pos, this.vel);
 
-        if (this.vel.length > 0.2) {
+        if (vec3.length(this.vel) > 2.0) {
             //this.vel = setLength(this.vel, 0.2);
             vec3.normalize(this.vel, this.vel);
-            vec3.multiply(this.vel, this.vel, vec3.fromValues(0.2, 0.2, 0.2));
+            vec3.multiply(this.vel, this.vel, vec3.fromValues(2.0, 2.0, 2.0));
 
         }
-
-        //this.acc = setLength(this.acc, 0.0);
         vec3.multiply(this.acc, this.acc, vec3.fromValues(0.0, 0.0, 0.0));
-
-
-        // if (acc) {
-        //     let axis: vec2 = vec2.create();
-        //     let orient: vec2 = vec2.create();
-        //     axis= vec2.fromValues(1.0, 0.0);
-        //     orient = vec2.fromValues(axis[0] * Math.cos(acc[0]) - axis[1] * Math.sin(acc[0]),
-        //                                 axis[0] * Math.sin(acc[0]) + axis[1] * Math.cos(acc[0]));
-        //     vec2.scale(orient, orient, acc[1] / 2.0);
-        //     vec2.add(this.pos, this.pos, orient);
-        // }
     }
 
     // Wrap particle at the edges 
     wrap() {
-        if (this.pos[0] > this.width) {
-            this.pos[0] = 0.0;
-        } 
-        else if (this.pos[0] < -this.size) {
-            this.pos[0] = this.width - 1.0;
-        }
+        //function sdSphere(p: vec3, s: number)
+        if (this.shape == 1) {
+            let sdfVal: number;
+            //let radius: number = 20.0;
+            let spherePos: vec3 = vec3.fromValues(25.0, 20.0, 20.0);
+            let temp: vec3 = vec3.fromValues(0.0, 0.0, 0.0);
+            vec3.subtract(temp, this.pos, spherePos);
+            sdfVal = sdSphere(temp, this.radius);
+            
 
-        if (this.pos[1] > this.height) {
-            this.pos[1] = 0.0;
-        }
-        else if (this.pos[1] < -this.size) {
-            this.pos[1] = this.height - 1.0;
-        }
+            if (sdfVal > 0.001) {
+                var d, x, y, z;
+                do {
+                    x = Math.random() * (this.radius * 2.0) + (spherePos[0] - this.radius);
+                    y = Math.random() * (this.radius * 2.0) + (spherePos[1] - this.radius);
+                    z = Math.random() * (this.radius * 2.0) + (spherePos[2] - this.radius);
+                    d = Math.sqrt(Math.pow(x - spherePos[0], 2) + Math.pow(y - spherePos[1], 2) + Math.pow(z - spherePos[2], 2));
+                } while(d > this.radius);
+                this.pos[0] = x;
+                this.pos[1] = y;
+                this.pos[2] = z;
+            }
+         }
 
-        if (this.pos[2] > this.depth) {
-            this.pos[2] = 0.0;
-        }
-        else if (this.pos[2] < -this.size) {
-            this.pos[2] = this.depth - 1.0;
+        else {
+            if (this.pos[0] > this.width) {
+                this.pos[0] = 0.0;
+            } 
+            else if (this.pos[0] < 0.0) {
+                this.pos[0] = this.width - 1.0;
+            }
+
+            if (this.pos[1] > this.height) {
+                this.pos[1] = 0.0;
+            }
+            else if (this.pos[1] < 0.0) {
+                this.pos[1] = this.height - 1.0;
+            }
+
+            if (this.pos[2] > this.depth) {
+                this.pos[2] = 0.0;
+            }
+            else if (this.pos[2] < 0.0) {
+                this.pos[2] = this.depth - 1.0;
+            }
         }
     }
 

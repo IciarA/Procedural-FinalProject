@@ -335,34 +335,6 @@ class Noise {
     }
 
 
-//     float hash( float n )
-// {
-//     return fract(sin(n)*758.5453);
-// }
-
-// float noise( in vec3 x )
-// {
-//     vec3 p = floor(x);
-//     vec3 f = fract(x); 
-//     float n = p.x + p.y*57.0 + p.z*800.0;
-//     float res = mix(mix(mix( hash(n+  0.0), hash(n+  1.0),f.x), mix( hash(n+ 57.0), hash(n+ 58.0),f.x),f.y),
-// 		    mix(mix( hash(n+800.0), hash(n+801.0),f.x), mix( hash(n+857.0), hash(n+858.0),f.x),f.y),f.z);
-//     return res;
-// }
-
-// float fbm( vec3 p )
-// {
-//     float f = 0.0;
-//     f += 0.50000*noise( p ); p = p*2.02;
-//     f -= 0.25000*noise( p ); p = p*2.03;
-//     f += 0.12500*noise( p ); p = p*3.01;
-//     f += 0.06250*noise( p ); p = p*3.04;
-//     f += 0.03500*noise( p ); p = p*4.01;
-//     f += 0.01250*noise( p ); p = p*4.04;
-//     f -= 0.00125*noise( p );
-//     return f/0.984375;
-// }
-
     fract(n: number) : number {
         return n - Math.floor(n);
     }
@@ -416,54 +388,6 @@ class Noise {
 
         return f / 0.984375;
     }
-
-//     float noise3D(vec3 p)
-// {
-// 	return fract(sin(dot(p ,vec3(12.9898,78.233,126.7378))) * 43758.5453)*2.0-1.0;
-// }
-
-// float linear3D(vec3 p)
-// {
-// 	vec3 p0 = floor(p);
-// 	vec3 p1x = vec3(p0.x+1.0, p0.y, p0.z);
-// 	vec3 p1y = vec3(p0.x, p0.y+1.0, p0.z);
-// 	vec3 p1z = vec3(p0.x, p0.y, p0.z+1.0);
-// 	vec3 p1xy = vec3(p0.x+1.0, p0.y+1.0, p0.z);
-// 	vec3 p1xz = vec3(p0.x+1.0, p0.y, p0.z+1.0);
-// 	vec3 p1yz = vec3(p0.x, p0.y+1.0, p0.z+1.0);
-// 	vec3 p1xyz = p0+1.0;
-	
-// 	float r0 = noise3D(p0);
-// 	float r1x = noise3D(p1x);
-// 	float r1y = noise3D(p1y);
-// 	float r1z = noise3D(p1z);
-// 	float r1xy = noise3D(p1xy);
-// 	float r1xz = noise3D(p1xz);
-// 	float r1yz = noise3D(p1yz);
-// 	float r1xyz = noise3D(p1xyz);
-	
-// 	float a = mix(r0, r1x, p.x-p0.x);
-// 	float b = mix(r1y, r1xy, p.x-p0.x);
-// 	float ab = mix(a, b, p.y-p0.y);
-// 	float c = mix(r1z, r1xz, p.x-p0.x);
-// 	float d = mix(r1yz, r1xyz, p.x-p0.x);
-// 	float cd = mix(c, d, p.y-p0.y);
-	
-	
-// 	float res = mix(ab, cd, p.z-p0.z);
-	
-// 	return res;
-// }
-
-// float fbm(vec3 p)
-// {
-// 	float f = 0.5000*linear3D(p*1.0); 
-// 		  f+= 0.2500*linear3D(p*2.01); 
-// 		  f+= 0.1250*linear3D(p*4.02); 
-// 		  f+= 0.0625*linear3D(p*8.03);
-// 		  f/= 0.9375;
-// 	return f;
-// }
     
 }
 export default Noise;

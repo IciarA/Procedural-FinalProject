@@ -52,18 +52,11 @@ void main()
     vec3 offset = vec3(vs_Translate.xyz);
     vec4 pos = vs_Pos; //vec3(vs_Pos.x, vs_Pos.y * 1.5, vs_Pos.z); // scale;
     pos = vec4(pos[0] * vs_Scale[1], pos[1] * vs_Scale[0], pos[2] * vs_Scale[2], 1.f);
-    //offset.z = (sin((u_Time + offset.x) * 3.14159 * 0.1) + cos((u_Time + offset.y) * 3.14159 * 0.1)) * 1.5;
-
-    //vec3 billboardPos = offset + vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];
     float angleX = vs_Angle[0];
     float angleY = vs_Angle[1];
     float angleZ = vs_Angle[2];
     pos = rotateX(angleX) * rotateY(angleY) * rotateZ(angleZ) * pos;
 
-    
-    //angleZ = angleZ * (3.1416 / 180.0);
-
-    //pos = rotateZ(angleZ) * pos;
 
     gl_Position = u_ViewProj * vec4(vec3(pos) + offset, 1.0);
 }

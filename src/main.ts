@@ -10,7 +10,6 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 
 import Field from './field';
 import Particle from './Particle';
-//import { multiply } from 'gl-matrix/src/gl-matrix/vec2';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -23,6 +22,8 @@ const controls = {
   colorTone: 0,
   randomFunction: 0,
   speed: 0.1,
+  shape: 0,
+  radius: 15.0,
   'Load Scene': loadScene,
 };
 
@@ -43,15 +44,10 @@ function rotateX(rad: number) : mat4 {
   let m: mat4 = mat4.create();
   mat4.identity(m);
 
-  //fromValues(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33)
   m = mat4.fromValues(1.0, 0.0, 0.0, 0.0, 
                   0.0, Math.cos(rad), Math.sin(rad), 0.0, 
                   0.0, -Math.sin(rad), Math.cos(rad), 0.0,
                   0.0, 0.0, 0.0, 1.0);
-  // m[1][1] = Math.cos(rad);
-  // m[2][1] = -sin(rad);
-  // m[1][2] = sin(rad);
-  // m[2][2] = cos(rad);
   return m;
 }
 
@@ -59,7 +55,6 @@ function rotateY(rad: number): mat4 {
   let m: mat4 = mat4.create();
   mat4.identity(m);
 
-  //fromValues(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33)
   m = mat4.fromValues(Math.cos(rad), 0.0, -Math.sin(rad), 0.0, 
                       0.0, 1.0, 0.0, 0.0, 
                       Math.sin(rad), 0.0, Math.cos(rad), 0.0,
@@ -71,7 +66,6 @@ function rotateZ(rad: number): mat4 {
   let m: mat4 = mat4.create();
   mat4.identity(m);
 
-  //fromValues(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33)
   m = mat4.fromValues(Math.cos(rad), Math.sin(rad), 0.0, 0.0, 
                       -Math.sin(rad), Math.cos(rad), 0.0, 0.0, 
                       0.0, 0.0, 1.0, 0.0,
@@ -89,16 +83,34 @@ function loadScene() {
   square2 = new Square();
   square2.create();
 
-  //particle = new Particle(5.0, 3.5, 2.0, vec4.fromValues(Math.random(), Math.random(), Math.random(), 1.0));
-  field = new Field(controls.width, controls.height, controls.depth);
+  let width: number;
+  let height: number;
+  let depth: number;
+
+  if (controls.shape == 0) {
+    width = controls.width;
+    height = controls.height;
+    depth = controls.depth;
+  }
+  else  {
+    width = controls.radius * 2.1;
+    height = controls.radius * 2.1;
+    depth = controls.radius * 2.1;
+  }
+
+  console.log(controls.shape);
+  console.log(width);
+  console.log(height);
+  console.log(depth);
+
+  field = new Field(width, height, depth);
 
   numParticles = 300;
   particles = [];
   trailParticles = [];
   for (let i = 0; i < 500; i++) {
-    particles.push(new Particle(Math.random() * controls.width, Math.random() * controls.height, Math.random() * controls.depth,
-                    vec4.fromValues(Math.random(), Math.random(), Math.random(), 1.0), controls.width,
-                    controls.height, controls.depth));
+    particles.push(new Particle(Math.random() * width, Math.random() * height, Math.random() * depth,
+                    vec4.fromValues(Math.random(), Math.random(), Math.random(), 1.0), width, height, depth));
     trailParticles[i] = [];
   }
 
@@ -115,47 +127,6 @@ function loadScene() {
   let scaleArray = [];
   let anglesArray = [];
   let n: number = 100.0;
-  // for(let i = 0; i < n; i++) {
-  //   for(let j = 0; j < n; j++) {
-  //     offsetsArray.push(i);
-  //     offsetsArray.push(j);
-  //     offsetsArray.push(0);
-
-  //     colorsArray.push(i / n);
-  //     colorsArray.push(j / n);
-  //     colorsArray.push(1.0);
-  //     colorsArray.push(1.0); // Alpha channel
-  //   }
-  // }
-
-  // for (let x = 0; x < field.columns; x++) {
-  //   for (let y = 0; y < field.rows; y++) {
-  //     for (let z = 0; z < field.colDepth; z++) {
-  //       let x1 = x * field.size;
-  //       let y1 = y * field.size;
-  //       let z1 = z * field.size;
-  //       //offsetsArray.push(x1 + field.flowField[i][j][0] * field.size * 2.0);
-  //       //offsetsArray.push(y1 + field.flowField[i][j][1] * field.size * 2.0);
-  //       offsetsArray.push(x1);
-  //       offsetsArray.push(y1);
-  //       offsetsArray.push(z1);
-  //       //offsetsArray.push(field.flowField[i][j][0]);
-
-  //       scaleArray.push(0.1);
-  //       scaleArray.push(field.flowField[x][y][z][0]);
-  //       scaleArray.push(0.1);
-
-  //       anglesArray.push(field.flowField[x][y][z][0]);
-  //       anglesArray.push(field.flowField[x][y][z][1]);
-  //       anglesArray.push(field.flowField[x][y][z][2]);
-
-  //       colorsArray.push(1.0);
-  //       colorsArray.push(1.0);
-  //       colorsArray.push(1.0);
-  //       colorsArray.push(1.0); // Alpha channel
-  //     }
-  //   }
-  // }
 
   for (let i = 0; i < controls.numberOfParticles; i++) {
     //particles[i].simpleMove();
@@ -179,18 +150,6 @@ function loadScene() {
     colorsArray.push(1.0); // Alpha channel
   }
 
-  // offsetsArray.push(particle.pos[0]);
-  // offsetsArray.push(particle.pos[1]);
-  // offsetsArray.push(0);
-
-  // scaleArray.push(0.3);
-  // scaleArray.push(0.3);
-  // scaleArray.push(1.0);
-
-  // colorsArray.push(1.0);
-  // colorsArray.push(0.0);
-  // colorsArray.push(1.0);
-  // colorsArray.push(1.0); // Alpha channel
 
   let offsets: Float32Array = new Float32Array(offsetsArray);
   let colors: Float32Array = new Float32Array(colorsArray);
@@ -217,12 +176,17 @@ function main() {
   gui.add(controls, 'speed', 0.0, 1.0).step(0.1);
   gui.add(controls, 'colorTone', { Random: 0, Warm: 1, Cold: 2 } );
   gui.add(controls, 'randomFunction', { Perlin: 0, Simplex: 1} );
-  var f1 = gui.addFolder('Dimensions');
+  gui.add(controls, 'shape', { Cube: 0, Sphere: 1} );
+  var f1 = gui.addFolder('Cube Dimensions');
   f1.add(controls, 'width', 1, 100).step(1);
   f1.add(controls, 'height', 1, 100).step(1);
   f1.add(controls, 'depth', 1, 100).step(1);
   f1.add(controls, 'Load Scene');
   f1.open();
+  var f2 = gui.addFolder('Sphere Dimensions');
+  f2.add(controls, 'radius', 1, 20).step(1);
+  f2.add(controls, 'Load Scene');
+  f2.open();
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -248,11 +212,8 @@ function main() {
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
-  //gl.enable(gl.BLEND);
   gl.enable(gl.BLEND);
-  //gl.glEnable(GL_BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-  //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   const instancedShader = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/instanced-vert.glsl')),
@@ -270,36 +231,14 @@ function main() {
     field.calculateField();
     field.noiseZ += 0.002;
 
-    //let pos = vec3.fromValues(0.0, 0.0, 0.0);
-    //vec3.divide(pos, particle.pos, vec3.fromValues(field.size, field.size, field.size));
 
-    // let v: vec2;
-    // if (pos[0] >= 0.0 && pos[0] < field.columns && pos[1] >= 0.0 && pos[1] < field.rows) {
-    //   // v = vec2.fromValues(field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][0], 
-    //   //                     field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][1]);
-    //   let angle: number;
-    //   let length: number;
-    //   angle = field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][0];
-    //   length = field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][1];
-    //   //console.log("pos: " + pos);
-    //   //console.log("length:");
-    //   //console.log(length);
-    //   //console.log("angle: " + angle);
-    //   v = vec2.fromValues(Math.cos(angle) * length, Math.sin(angle) * length);
-    // }
-    // //console.log(v);
-    
-    // particle.move(v);
-    // //particle.applyForce(v);
-    // //particle.simpleMove();
-    // particle.wrap();
 
     let offsetsArray = [];
     let colorsArray = [];
     let scaleArray = [];
     let anglesArray = [];
 
-    //let n: number = 100.0;
+    /* Uncomment this to visualize flow field */
 
     // for (let x = 0; x < field.columns; x++) {
     //   for (let y = 0; y < field.rows; y++) {
@@ -338,18 +277,6 @@ function main() {
 
       let pos = vec3.fromValues(0.0, 0.0, 0.0);
       vec3.divide(pos, particles[i].pos, vec3.fromValues(field.size, field.size, field.size));
-      // let v: vec2;
-      // if (pos[0] >= 0.0 && pos[0] < field.columns && pos[1] >= 0.0 && pos[1] < field.rows) {
-      //   // v = vec2.fromValues(field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][0], 
-      //   //                     field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][1]);
-      //   let angle: number;
-      //   let length: number;
-      //   angle = field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][0];
-      //   length = field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][1];
-      //   v = vec2.fromValues(Math.cos(angle) * length, Math.sin(angle) * length);
-      //   //v = vec2.fromValues(field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][0], 
-      //   //                     field.flowField[Math.floor(pos[0])][Math.floor(pos[1])][1]);
-      // }
 
       
       let v: vec4 = vec4.create();
@@ -372,12 +299,8 @@ function main() {
         vec4.transformMat4(v, vec4.fromValues(length, length, length, 0.0), rotateX(angleX));
       }
 
-      //particles[i].movePos(vec3.fromValues(v[0], v[1], v[2]));
-
-      
-
-      // //particles[i].simpleMove();
-      //console.log(v);
+      particles[i].shape = controls.shape;
+      particles[i].radius = controls.radius;
       particles[i].speed = controls.speed;
       particles[i].move(vec3.fromValues(v[0], v[1], v[2]));
       particles[i].wrap();
@@ -414,7 +337,6 @@ function main() {
         offsetsArray.push(trailParticles[i][j].pos[1]);
         offsetsArray.push(trailParticles[i][j].pos[2]);
 
-        //let val: number = Math.pow(j / (startCond), 2.5);
         let alpha: number;
         if (endCond >= 0.0) {
           alpha = (j - endCond) / (startCond - endCond);
@@ -437,19 +359,6 @@ function main() {
         colorsArray.push(alpha); // Alpha channel
       }
     }
-
-    // offsetsArray.push(particle.pos[0]);
-    // offsetsArray.push(particle.pos[1]);
-    // offsetsArray.push(0);
-
-    // scaleArray.push(0.3);
-    // scaleArray.push(0.3);
-    // scaleArray.push(1.0);
-
-    // colorsArray.push(1.0);
-    // colorsArray.push(0.0);
-    // colorsArray.push(1.0);
-    // colorsArray.push(1.0); // Alpha channel
 
     let offsets: Float32Array = new Float32Array(offsetsArray);
     let colors: Float32Array = new Float32Array(colorsArray);
