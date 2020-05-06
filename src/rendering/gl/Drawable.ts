@@ -8,6 +8,7 @@ abstract class Drawable {
   bufNor: WebGLBuffer;
   bufTranslate: WebGLBuffer;
   bufScale: WebGLBuffer;
+  bufAngle: WebGLBuffer;
   bufCol: WebGLBuffer;
   bufUV: WebGLBuffer;
 
@@ -17,6 +18,7 @@ abstract class Drawable {
   colGenerated: boolean = false;
   translateGenerated: boolean = false;
   scaleGenerated: boolean = false;
+  angleGenerated: boolean = false;
   uvGenerated: boolean = false;
 
   numInstances: number = 0; // How many instances of this Drawable the shader program should draw
@@ -30,6 +32,7 @@ abstract class Drawable {
     gl.deleteBuffer(this.bufCol);
     gl.deleteBuffer(this.bufTranslate);
     gl.deleteBuffer(this.bufScale);
+    gl.deleteBuffer(this.bufAngle);
     gl.deleteBuffer(this.bufUV);
   }
 
@@ -61,6 +64,11 @@ abstract class Drawable {
   generateScale() {
     this.scaleGenerated = true;
     this.bufScale = gl.createBuffer();
+  }
+
+  generateAngle() {
+    this.angleGenerated = true;
+    this.bufAngle = gl.createBuffer();
   }
 
   generateUV() {
@@ -108,6 +116,13 @@ abstract class Drawable {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.bufScale);
     }
     return this.scaleGenerated;
+  }
+
+  bindAngle(): boolean {
+    if (this.angleGenerated) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.bufAngle);
+    }
+    return this.angleGenerated;
   }
 
   bindUV(): boolean {
